@@ -1,4 +1,5 @@
 import mongoose, {Schema} from 'mongoose'
+import Product from './Product';
 
 const User = new Schema(
     {
@@ -6,7 +7,6 @@ const User = new Schema(
         lastName: { type: String },
         email: { type: String, unique: true },
         password: { type: String, required: true },
-        confirmPassword: { type: String },
         image: { type: String },
     },
     {
