@@ -4,7 +4,7 @@ const getAllCategory = async (req, res) => {
     try {
         const categorys = await categoryService.getAllCategory()
         return res.status(200).json({
-            message: 'Get all Category successfully',
+            message: 'Get all Category successfully bi ngu roi à',
             data: categorys
         })
     } catch (error) {
@@ -14,7 +14,20 @@ const getAllCategory = async (req, res) => {
         })
     }
 }
+const uploadImage = async (req, res) => {
+    try {
+        const fileData = req.file
+        console.log(fileData)
+        res.status(200).json(fileData)
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "Upload failed"
+        })
+    }
+}
 
 export default {
-    getAllCategory
+    getAllCategory,
+    uploadImage
 }
