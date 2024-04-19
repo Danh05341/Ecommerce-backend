@@ -12,8 +12,18 @@ const getAllProduct = async () => {
     return products
     
 }
+const getProductById = async (id) => {
+    const product = await Product.findById(id).populate('brand_id').exec()
+    return product
+}
+const updateProduct = async (id, update) => {
+    const product = await Product.findByIdAndUpdate(id, update).exec()
+    return product
+}
 
 export default {
     addProduct,
-    getAllProduct
+    getAllProduct,
+    getProductById,
+    updateProduct
 }

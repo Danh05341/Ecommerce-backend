@@ -14,7 +14,22 @@ const getAllBrand = async (req, res) => {
         })
     }
 }
+const getBrandById = async (req, res) => {
+    try {
+        const brand = await brandService.getBrandById(req.params.id)
+        return res.status(200).json({
+            message: 'Get  Brand successfully',
+            data: brand
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "Get  Brand failed"
+        })
+    }
+}
 
 export default {
-    getAllBrand
+    getAllBrand,
+    getBrandById
 }

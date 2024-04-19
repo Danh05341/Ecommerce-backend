@@ -4,6 +4,7 @@ import categoryService from "./category.js";
 import sliderService from "./slider.js";
 import bannerService from "./banner.js";
 import brandService from "./brand.js";
+import cartService from "./cart.js";
 
 export {
     userService,
@@ -11,5 +12,6 @@ export {
     categoryService,
     sliderService,
     bannerService,
-    brandService
+    brandService,
+    cartService
 }

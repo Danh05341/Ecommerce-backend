@@ -2,11 +2,12 @@ import mongoose, {Schema} from 'mongoose'
 
 const Cart = new Schema(
     {
-        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // Tham chiếu đến người dùng
         items: [
             {
-                productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true }, // Tham chiếu đến sản phẩm
-                quantity: { type: Number, default: 1 },
+
+                productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", _id: false }, // Tham chiếu đến sản phẩm
+                quantity: { type: Number},
+
             },
         ], // Mảng các sản phẩm trong giỏ hàng
     },

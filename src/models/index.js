@@ -4,6 +4,8 @@ import Category from './Category.js'
 import Slider from './Slider.js'
 import Banner from './Banner.js'
 import Brand from './Brand.js'
+import Cart from './Cart.js'
+import Payment from './Payment.js'
 
 export {
     User,
@@ -11,5 +13,7 @@ export {
     Category,
     Slider,
     Banner,
-    Brand
+    Brand,
+    Cart,
+    Payment
 }

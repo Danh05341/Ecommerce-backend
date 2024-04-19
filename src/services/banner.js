@@ -1,7 +1,17 @@
-import { Banner } from '../models/index.js';
+import { Banner, Product } from '../models/index.js';
+
 
 const getAllBanner = async () => {
-    const banner = await Banner.find({}).exec()
+    // Trả về giá trị duy nhất của trường được chỉ định
+    // const banner = await Banner.distinct('category_name').exec()
+    // const banner = ['Giày thể thao', 'Giày nam']
+    // console.log('banner: ', banner)
+    // const result = await Product.aggregate([
+    //     {
+    //         $match: { category: { $in: banner } }
+    //     }
+    // ])
+    const banner = await Banner.find({})
     return banner
 }
 

@@ -40,11 +40,21 @@ const getAllCategory = async () => {
         return result;
     }
     const categories = await getCategoriesWithChildren();
-   
+    console.log(categories)
 
     return categories;
 }
 
+const getCategoryBySlug = async (slug) => {
+   
+    const category = await Category.findOne({slug}).exec();
+    if (!category) {
+        throw new Error(`Category not found`)
+    }
+    return category;
+}
+
 export default {
-    getAllCategory
+    getAllCategory,
+    getCategoryBySlug
 }

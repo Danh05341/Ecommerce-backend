@@ -2,15 +2,29 @@ import { categoryService } from '../services/index.js'
 
 const getAllCategory = async (req, res) => {
     try {
-        const categorys = await categoryService.getAllCategory()
+        const categories = await categoryService.getAllCategory()
         return res.status(200).json({
             message: 'Get all Category successfully',
-            data: categorys
+            data: categories
         })
     } catch (error) {
         return res.json({
             error: error.toString(),
             message: "Get all Category failed"
+        })
+    }
+}
+const getCategoryBySlug = async (req, res) => {
+    try {
+        const category = await categoryService.getCategoryBySlug(req.params.slug)
+        return res.status(200).json({
+            message: 'Get Category Details successfully',
+            data: category
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "Get Category Details failed"
         })
     }
 }
@@ -29,5 +43,6 @@ const uploadImage = async (req, res) => {
 
 export default {
     getAllCategory,
-    uploadImage
+    uploadImage,
+    getCategoryBySlug
 }

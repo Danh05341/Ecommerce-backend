@@ -1,14 +1,13 @@
 import { userService } from '../services/index.js'
 
 const register = async (req, res) => {
-    const { firstName, lastName, email, password, confirmPassword, image } = req.body;
+    const { firstName, lastName, email, password, image } = req.body;
     try {
         const user = await userService.register({
             firstName,
             lastName,
             email,
             password,
-            confirmPassword,
             image
         })
         return res.status(200).json({
@@ -37,8 +36,26 @@ const login = async (req, res) => {
         })
     }
 }
-
+const refreshToken = async (req, res) => {
+    const refreshToken = req.headers.authorization.split(' ')[1]
+    try {
+        if(!refreshToken) {
+            throw new Error('Invalid refresh token')
+        }
+        const response = await userService.refreshToken(refreshToken)
+        return res.status(200).json({
+            token: response
+        })
+        
+    } catch (error) {
+        return res.status(400).json({
+            error: error.toString(),
+            message: error.message
+        })
+    }
+}
 export default {
     register,
-    login
+    login,
+    refreshToken
 }

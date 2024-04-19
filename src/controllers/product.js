@@ -31,8 +31,40 @@ const getAllProduct = async (req, res) => {
         })
     }
 }
+const getProductById = async (req, res) => {
+    try {
+        const product = await productService.getProductById(req.params.slug)
+        return res.status(200).json({
+            message: 'Get product successfully',
+            data: product
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "Get product failed"
+        })
+    }
+}
+const updateProduct = async (req, res) => {
+    try {
+        const updatedProduct = req.body
+        const product = await productService.updateProduct(req.params.id, updatedProduct)
+        return res.status(200).json({
+            message: 'Update product successfully',
+            data: product
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "Update product failed"
+        })
+    }
+}
+
 
 export default {
     addProduct,
-    getAllProduct
+    getAllProduct,
+    getProductById,
+    updateProduct
 }
