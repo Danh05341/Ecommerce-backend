@@ -31,9 +31,17 @@ const getAllProduct = async (req, res) => {
         })
     }
 }
-const getProductById = async (req, res) => {
+const getProductBySlug = async (req, res) => {
     try {
-        const product = await productService.getProductById(req.params.slug)
+        const query = req.query
+        const slug = req.params.slug
+        let product = []
+        if (req.params.slug === 'all') {
+            product = await productService.getAllProduct(query)
+        }
+        else {
+            product = await productService.getProductBySlug(req.params.slug)
+        }
         return res.status(200).json({
             message: 'Get product successfully',
             data: product
@@ -65,6 +73,6 @@ const updateProduct = async (req, res) => {
 export default {
     addProduct,
     getAllProduct,
-    getProductById,
+    getProductBySlug,
     updateProduct
 }

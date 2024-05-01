@@ -1,4 +1,5 @@
 import { Category } from '../models/index.js';
+import { getCategoriesWithChildren } from '../utils/category.js'
 
 const getAllCategory = async () => {
     // const categories = await Category.aggregate([
@@ -25,29 +26,14 @@ const getAllCategory = async () => {
     //         }//chỉ định những trường cần hiển thị/ loại bỏ trường đó bằng cách xóa trong $project
     //     }
     // ]);
-    const getCategoriesWithChildren = async (parentId = null) => {
-        const categories = await Category.find({ parent: parentId }).exec();
-        const result = [];
-    
-        for (const category of categories) {
-            const children = await getCategoriesWithChildren(category.name);
-            const categoryObj = category.toObject();
-            if (children.length > 0) {
-                categoryObj.children = children;
-            }
-            result.push(categoryObj);
-        }
-        return result;
-    }
+    // Get All Categories
     const categories = await getCategoriesWithChildren();
-    console.log(categories)
-
     return categories;
 }
 
 const getCategoryBySlug = async (slug) => {
-   
-    const category = await Category.findOne({slug}).exec();
+
+    const category = await Category.findOne({ slug }).exec();
     if (!category) {
         throw new Error(`Category not found`)
     }
