@@ -9,15 +9,29 @@ const addProduct = async ({ name, category, image, price, description }) => {
 }
 const getAllProduct = async (query) => {
     // const { page, search, sort, brand, price, size } = query
-    // const skip = ( page - 1 ) * 10
-    const limit = 10
-    // const products = await Product.find({}).skip(skip).limit(limit).exec()
-    const products = await Product.find({}).exec()
+
+    const page = query.page || 1
+    const search = query.search || ""
+    const sort = query.sort || 'desc'
+    const brand = query.brand || ""
+    const price = query.price || ""
+    const size = query.size || ""
+
+    const limit = 12
+    const skip = ( page - 1 ) * limit
+    const product = await Product.find({}).skip(skip).limit(limit).populate('brand_id').exec()
+    const totalProduct = await Product.countDocuments({}).exec()
+    const totalPage = Math.ceil(totalProduct / 12)
+    
+    return {
+        product,
+        totalPage
+    }
     return products
 
 }
 
-const getProductBySlug = async (slug) => {
+const getProductBySlug = async (slug, query) => {
     // const { page, search, sort, brand, price, size } = query
     // console.log(page, search, sort, brand, price, size)
     
@@ -32,8 +46,26 @@ const getProductBySlug = async (slug) => {
     // Mảng tên danh mục
     const categoryNames = categoryParent.concat(categoryChildren)
     // console.log(categoryNames)
-    product = await Product.find({ category: categoryNames }).populate('brand_id').exec()
-    return product
+
+    const page = query.page || 1
+    const search = query.search || ""
+    const sort = query.sort || 'desc'
+    const brand = query.brand || ""
+    const price = query.price || ""
+    const size = query.size || ""
+
+    const limit = 12
+    const skip = ( page - 1 ) * limit
+
+
+    product = await Product.find({ category: categoryNames }).skip(skip).limit(limit).populate('brand_id').exec()
+    const totalProduct = await Product.countDocuments({ category: categoryNames }).exec()
+    const totalPage = Math.ceil(totalProduct / 12)
+    
+    return {
+        product,
+        totalPage
+    }
 }
 
 const updateProduct = async (id, update) => {

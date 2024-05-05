@@ -23,9 +23,10 @@ const getAllProduct = async (req, res) => {
         return res.status(200).json({
             message: 'Get all product successfully',
             data: products
+            
         })
     } catch (error) {
-        return res.json({
+        return res.status(400).json({
             error: error.toString(),
             message: "Get all product failed"
         })
@@ -34,20 +35,24 @@ const getAllProduct = async (req, res) => {
 const getProductBySlug = async (req, res) => {
     try {
         const query = req.query
+
         const slug = req.params.slug
-        let product = []
+        
+        let result = []
         if (req.params.slug === 'all') {
-            product = await productService.getAllProduct(query)
+            result = await productService.getAllProduct(query)
         }
         else {
-            product = await productService.getProductBySlug(req.params.slug)
+            result = await productService.getProductBySlug(req.params.slug, query)
         }
         return res.status(200).json({
             message: 'Get product successfully',
-            data: product
+            data: result.product,
+            totalPage: result.totalPage
+
         })
     } catch (error) {
-        return res.json({
+        return res.status(400).json({
             error: error.toString(),
             message: "Get product failed"
         })
