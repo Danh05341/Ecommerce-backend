@@ -65,8 +65,12 @@ const getProductBySlug = async (slug, query) => {
     let totalProduct = 0
 
     product = await Product.findOne({ slug: slug }).populate('brand_id').exec()
+
     // Nếu không tìm thấy product = null
-    if (product) return product
+    if (product) return {
+        product
+    }
+    console.log('product2:')
 
     const categoryParent = await Category.findOne({ slug: slug }).distinct('name').exec()
     const categoryWithChildren = await getCategoriesWithChildren(categoryParent)
