@@ -1,5 +1,6 @@
 import { Brand, Category, Product } from '../models/index.js';
 import { getCategoriesWithChildren, getAllCategoryNames } from '../utils/category.js';
+import brand from './brand.js';
 
 const addProduct = async ({ name, category, image, price, description }) => {
     const newProduct = await Product.create({ name, category, image, price, description })
@@ -25,6 +26,7 @@ const getAllProduct = async (query) => {
     const brandIds = await Brand.find({ name: { $in: brands } }).distinct('_id').exec()
     let product = []
     let totalProduct = 0
+    let brandNames = []
     // TH1: brands trả về []
     if (brands.length > 0) {
         console.log('TH1: ', brands)
@@ -50,11 +52,13 @@ const getAllProduct = async (query) => {
 
     console.log('count: ', totalProduct)
     const totalPage = Math.ceil(totalProduct / 12)
-    // const brandName =  [... new Set(product.map(data => data.brand_id))]
+
+    brandNames = await Brand.find({}).exec()
+    console.log('brand: ', brandNames)
     return {
         product,
         totalPage,
-        // brandName
+        brandNames
     }
 }
 
@@ -63,6 +67,7 @@ const getProductBySlug = async (slug, query) => {
     // console.log(page, search, sort, brand, price, size)
     let product = []
     let totalProduct = 0
+    let brandNames = []
 
     product = await Product.findOne({ slug: slug }).populate('brand_id').exec()
 
@@ -93,10 +98,10 @@ const getProductBySlug = async (slug, query) => {
     // TH1: brands trả về []
     if (brands.length > 0) {
         console.log('TH1: ', brands)
+        // mảng brand Id của checkbox
         const brandIds = await Brand.find({ name: { $in: brands } }).distinct('_id').exec()
         product = await Product.find({ category: categoryNames, brand_id: { $in: brandIds } }).skip(skip).limit(limit).populate('brand_id').exec()
         totalProduct = await Product.countDocuments({ category: categoryNames, brand_id: { $in: brandIds } }).exec()
-        
 
     } else {
         // TH2: brands trả về [] brand_id
@@ -110,13 +115,17 @@ const getProductBySlug = async (slug, query) => {
     // product = await Product.find({ category: categoryNames }).skip(skip).limit(limit).populate('brand_id').exec()
     // const totalProduct = await Product.countDocuments({ category: categoryNames }).exec()
     const totalPage = Math.ceil(totalProduct / 12)
-    // const brandName = [...new Set(product.map(item => item.brand_id))];
 
+    // mảng brand Id của mỗi danh mục
+    const brandIds = await Product.find({ category: categoryNames }).distinct('brand_id').exec()
+    if (brandIds) {
+        brandNames = await Brand.find({ _id: brandIds }).exec()
+    }
 
     return {
         product,
         totalPage,
-        // brandName
+        brandNames
     }
 }
 

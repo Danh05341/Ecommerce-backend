@@ -49,7 +49,7 @@ const getProductBySlug = async (req, res) => {
             message: 'Get product successfully',
             data: result.product,
             totalPage: result.totalPage,
-            // brandName: result.brandName,
+            brandNames: result.brandNames,
         })
     } catch (error) {
         return res.status(400).json({
