@@ -8,6 +8,11 @@ const addProduct = async ({ name, category, image, price, description }) => {
         ...newProduct.toObject()
     }
 }
+
+const getProduct = async () => {
+    return await Product.find({}).limit(15)
+}
+
 const getAllProduct = async (query) => {
     // const { page, search, sort, brand, price, size } = query
 
@@ -54,7 +59,6 @@ const getAllProduct = async (query) => {
     const totalPage = Math.ceil(totalProduct / 12)
 
     brandNames = await Brand.find({}).exec()
-    console.log('brand: ', brandNames)
     return {
         product,
         totalPage,
@@ -138,5 +142,6 @@ export default {
     addProduct,
     getAllProduct,
     getProductBySlug,
-    updateProduct
+    updateProduct,
+    getProduct
 }
