@@ -9,19 +9,22 @@ const getCartById = async (id) => {
     return cart
 }
 const updateCart = async (id, update) => {
-    
     const cart = await Cart.findById(id).exec();
     const existingProductIndex = cart.items.findIndex(
-        product => product.productId.toString() === update._id
+        product => product.productId.toString() === update.product._id
     );
     if (existingProductIndex !== -1) {
-        // Nếu có, tăng quantity
-        cart.items[existingProductIndex].quantity += 1;
+        // Nếu có, thay đổi quantity
+        if (update.setCount) {
+            cart.items[existingProductIndex].quantity = Number(update.value);
+        } else {
+            cart.items[existingProductIndex].quantity += Number(update.value);
+        }
     } else {
         // Nếu không, thêm update vào mảng items
         cart.items.push({
-            productId: update._id,
-            quantity: 1,
+            productId: update.product._id,
+            quantity: update.value,
         });
     }
     await cart.save();
