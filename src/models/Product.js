@@ -1,4 +1,4 @@
-import mongoose, {Schema} from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 
 const Product = new Schema(
     {
@@ -12,7 +12,14 @@ const Product = new Schema(
         description: { type: String },
         total: { type: Number, required: true },
         status: { type: Boolean, required: true },
-        brand_id: {type:  mongoose.Schema.Types.ObjectId, ref: "Brand"}
+        size: [
+            {
+                _id: false,
+                size: { type: String, required: true },
+                quantity: { type: String, required: true }
+            }
+        ],
+        brand_id: { type: mongoose.Schema.Types.ObjectId, ref: "Brand" }
     },
     {
         timestamps: true,

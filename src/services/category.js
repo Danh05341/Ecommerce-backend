@@ -1,5 +1,5 @@
 import { Category } from '../models/index.js';
-import { getCategoriesWithChildren } from '../utils/category.js'
+import { getAllCategoryNames, getCategoriesWithChildren } from '../utils/category.js'
 
 const getAllCategory = async () => {
     // const categories = await Category.aggregate([
@@ -33,6 +33,9 @@ const getAllCategory = async () => {
 
 const getCategoryBySlug = async (slug) => {
 
+    if(slug === 'all') {
+        return await Category.find({})
+    }
     const category = await Category.findOne({ slug }).exec();
     if (!category) {
         throw new Error(`Category not found`)

@@ -134,8 +134,25 @@ const getProductBySlug = async (slug, query) => {
 }
 
 const updateProduct = async (id, update) => {
-    const product = await Product.findByIdAndUpdate(id, update).exec()
-    return product
+    const productData = await Product.findById(id).exec()
+    if (!productData) {
+        throw new Error('Product not found');
+    }
+    const product = {...productData._doc}
+    product.name = update.name ?? product.name
+    product.price = update.price ?? product.price
+    product.sale_price = update.sale_price ?? product.sale_price
+    product.image = update.image ?? product.image
+    product.description = update.description ?? product.description
+    product.category = update.category ?? product.category
+    product.brand_id = update.brand_id ?? product.brand_id
+    product.slug = update.slug ?? product.slug
+    product.status = update.status ?? product.status
+    product.total = update.total ?? product.total
+    product.size = update.size ?? product.size
+
+    const productUpdated = await Product.findByIdAndUpdate(id, product, { new: true }).exec()
+    return productUpdated
 }
 
 export default {
