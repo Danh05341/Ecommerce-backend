@@ -54,8 +54,24 @@ const refreshToken = async (req, res) => {
         })
     }
 }
+const getUserById = async (req, res) => {
+    try {
+        const existingUser = await userService.getUserById(req.params.id)
+        if(!existingUser) throw new Error('User not found')
+        return res.status(200).json({
+            message: 'Get user successfully',
+            data: existingUser
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "Get user failed"
+        })
+    }
+}
 export default {
     register,
     login,
-    refreshToken
+    refreshToken,
+    getUserById
 }

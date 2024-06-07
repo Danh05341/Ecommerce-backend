@@ -5,6 +5,8 @@ import sliderService from "./slider.js";
 import bannerService from "./banner.js";
 import brandService from "./brand.js";
 import cartService from "./cart.js";
+import paymentService from "./payment.js";
+import orderService from "./order.js";
 
 export {
     userService,
@@ -13,5 +15,7 @@ export {
     sliderService,
     bannerService,
     brandService,
-    cartService
+    cartService,
+    paymentService,
+    orderService
 }

@@ -12,10 +12,10 @@ const storage = new CloudinaryStorage({
   cloudinary,
   allowedFormats: ['jpg', 'png'],
   params: {
-    folder: 'Ecommerce_MERN'
+    folder: 'Ecommerce_MERN/temporary'
   }
 });
 
 const uploadCloud = multer({ storage });
-uploadCloud
+
 export default uploadCloud

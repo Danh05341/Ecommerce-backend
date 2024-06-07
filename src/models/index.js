@@ -6,6 +6,8 @@ import Banner from './Banner.js'
 import Brand from './Brand.js'
 import Cart from './Cart.js'
 import Payment from './Payment.js'
+import Province from './Province.js'
+import Order from './Order.js'
 
 export {
     User,
@@ -15,5 +17,7 @@ export {
     Banner,
     Brand,
     Cart,
-    Payment
+    Payment,
+    Province,
+    Order
 }

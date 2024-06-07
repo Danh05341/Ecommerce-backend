@@ -79,7 +79,7 @@ const login = async ({ email, password }) => {
 const refreshToken = async (token) => {
     try {
         const jwtObject = jwt.verify(token, process.env.JWT_SECRET)
-        
+
         const accessToken = await generateAccesstoken(jwtObject.data)
         const refreshToken = await generateRefreshToken(jwtObject.data)
         return {
@@ -93,8 +93,16 @@ const refreshToken = async (token) => {
     }
 }
 
+const getUserById = async (id) => {
+    const user = await User.findById(id);
+    if (!user) throw new Error('User not found')
+    return user
+}
+
+
 export default {
     register,
     login,
-    refreshToken
+    refreshToken,
+    getUserById
 }

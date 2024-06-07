@@ -5,6 +5,10 @@ import sliderController from './slider.js'
 import bannerController from './banner.js'
 import brandController from './brand.js'
 import cartController from './cart.js'
+import uploadController from './upload.js'
+import provinceController from './province.js'
+import paymentController from './payment.js'
+import orderController from './order.js'
 
 export {
     userController,
@@ -13,5 +17,9 @@ export {
     sliderController,
     bannerController,
     brandController,
-    cartController
+    cartController,
+    uploadController,
+    provinceController,
+    paymentController,
+    orderController
 }

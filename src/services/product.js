@@ -155,10 +155,16 @@ const updateProduct = async (id, update) => {
     return productUpdated
 }
 
+const deleteProducts = async (id, dataToDelete) => {
+    const result = await Product.deleteMany({ 'size.size': { $in: idsToDelete } });
+    return result
+}
+
 export default {
     addProduct,
     getAllProduct,
     getProductBySlug,
     updateProduct,
-    getProduct
+    getProduct,
+    deleteProducts,
 }

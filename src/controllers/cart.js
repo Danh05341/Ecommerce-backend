@@ -44,7 +44,7 @@ const updateCart = async (req, res) => {
 }
 const deleteProductCart = async (req, res) => {
     try {
-        const cart = await cartService.deleteProductCart(req.params.id, req.body.id)
+        const cart = await cartService.deleteProductCart(req.params.id, req.body)
         return res.status(200).json({
             message: 'Delete Product Cart successfully',
             data: cart

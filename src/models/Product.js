@@ -16,7 +16,8 @@ const Product = new Schema(
             {
                 _id: false,
                 size: { type: String, required: true },
-                quantity: { type: String, required: true }
+                quantity: { type: String, required: true },
+                price: { type: String, default: null}
             }
         ],
         brand_id: { type: mongoose.Schema.Types.ObjectId, ref: "Brand" }

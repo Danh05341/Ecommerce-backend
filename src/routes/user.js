@@ -5,6 +5,7 @@ import { userController } from '../controllers/index.js';
 router.post('/signup', userController.register);
 router.post('/login', userController.login);
 router.post('/refreshToken', userController.refreshToken);
+router.post('/:id', userController.getUserById);
 // router.post('/refreshToken', userController.refreshToken);
 
 

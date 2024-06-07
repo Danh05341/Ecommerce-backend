@@ -73,11 +73,27 @@ const updateProduct = async (req, res) => {
         })
     }
 }
+const deleteProducts = async (req, res) => {
+    try {
+        const updatedProduct = req.body
+        const product = await productService.updateProduct(req.params.id, updatedProduct)
+        return res.status(200).json({
+            message: 'Update product successfully',
+            data: product
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "Update product failed"
+        })
+    }
+}
 
 
 export default {
     addProduct,
     getAllProduct,
     getProductBySlug,
-    updateProduct
+    updateProduct,
+    deleteProducts
 }
