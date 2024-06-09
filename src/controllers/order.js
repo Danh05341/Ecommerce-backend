@@ -77,11 +77,26 @@ const updateOrder = async (req, res) => {
         })
     }
 }
+const getRevenueSummary = async (req, res) => {
+    try {
+        const revenueSummary = await orderService.getRevenueSummary(req.body)
+        return res.status(200).json({
+            message: 'getRevenueSummary successfully',
+            data: revenueSummary
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "getRevenueSummary failed"
+        })
+    }
+}
 
 export default {
     getAllOrder,
     createOrder,
     getOrdersUserById,
     getOrderDetailsById,
-    updateOrder
+    updateOrder,
+    getRevenueSummary
 }

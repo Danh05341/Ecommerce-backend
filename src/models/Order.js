@@ -69,7 +69,7 @@ const Order = new Schema(
         },
         proccesingStatus: {
             type: String,
-            enum: ['unconfirmed', 'delivering', 'finish', 'cancel'],
+            enum: ['all', 'unconfirmed', 'delivering', 'finish', 'cancel'],
             default: 'unconfirmed',
         },
     },

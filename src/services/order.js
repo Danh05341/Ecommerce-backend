@@ -1,14 +1,65 @@
 import { Order } from '../models/index.js';
+import { format } from 'date-fns';
 const PAGE_LIMIT = 10
-const getAllOrder = async (query) => {
-   const page = query.page;
-   const limit = query.limit || PAGE_LIMIT;
-   const skip = (page - 1) * limit
-   
+import { dateConverterUTC } from '../utils/date.js';
+
+const getAllOrder = async (queryParams) => {
+   // const page = query.page || 1;
+   // const limit = query.limit || PAGE_LIMIT;
+   // let statusProcessing = query.status ? [...query.status.split(',')] : 'all'
+   // const skip = (page - 1) * limit
+
+   // let orders = []
+   // let totalPage = 0
+   // try {
+   //    if (statusProcessing === 'all' || statusProcessing[0] === 'all') {
+   //       orders = await Order.find({}).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
+   //       totalPage = await Order.countDocuments({})
+   //    } else {
+   //       orders = await Order.find({ proccesingStatus: statusProcessing }).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
+   //       totalPage = await Order.countDocuments({ proccesingStatus: statusProcessing })
+   //    }
+
    try {
-      const orders = await Order.find({}).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
-      const totalPage = await Order.countDocuments({})
-      
+      const { status, limit, page, startDate, endDate } = queryParams;
+      let query = {};
+      console.log('queryParams: ', queryParams);
+      if (status && status !== 'all') {
+         query.proccesingStatus = { $in: status.split(',') };
+      }
+      ////
+      const endDateUTC = dateConverterUTC(endDate);
+
+      // Cộng thêm một ngày
+      endDateUTC.setDate(endDateUTC.getDate() + 1);
+
+      // Tạo một đối tượng `Date` mới chứa ngày đã được cộng thêm
+      const newEndDate = new Date(endDateUTC);
+      //////
+      // console.log('start: ', new Date(dateConverterUTC(startDate)))
+      // console.log('end: ', newEndDate)
+      // console.log('datef: ', new Date((startDate)).setUTCHours(0, 0, 0, 0))
+      // console.log('datel: ', new Date((endDate)).setUTCHours(23, 59, 59, 999))
+      // console.log('date1: ', new Date(new Date((startDate)).setUTCHours(0, 0, 0, 0)))
+      // console.log('date2: ', new Date(new Date((endDate)).setUTCHours(23, 59, 59, 999)))
+
+      if (startDate && endDate) {
+         query.createdAt = {
+            $gte: new Date(dateConverterUTC(startDate)),
+            $lte: newEndDate
+         };
+      } else if (startDate) {
+         query.createdAt = { $gte: new Date(dateConverterUTC(startDate)) };
+      } else if (endDate) {
+         query.createdAt = { $lte: newEndDate };
+      }
+
+      const orders = await Order.find(query)
+         .limit(limit ? parseInt(limit) : 10)
+         .skip(page ? (parseInt(page) - 1) * limit : 0)
+         .sort({ createdAt: -1 })
+      const totalPage = await Order.countDocuments(query);
+
       return {
          orders,
          totalPage
@@ -62,13 +113,57 @@ const getOrderDetailsById = async (id) => {
    }
 }
 
-const getOrdersUserById = async (id, query) => {
-   const page = query.page;
-   const limit = query.limit || PAGE_LIMIT;
-   const skip = (page - 1) * limit
+const getOrdersUserById = async (id, queryParams) => {
+   // const page = query.page;
+   // const limit = query.limit || PAGE_LIMIT;
+   // const skip = (page - 1) * limit
+   // try {
+   //    const order = await Order.find({ userId: id }).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
+   //    const totalPage = await Order.countDocuments({ userId: id })
+   //    return {
+   //       order,
+   //       totalPage
+   //    };
    try {
-      const order = await Order.find({userId: id}).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
-      const totalPage = await Order.countDocuments({userId: id})
+      const { status, limit, page, startDate, endDate } = queryParams;
+      let query = { userId: id };
+      console.log('queryParams: ', queryParams);
+      if (status && status !== 'all') {
+         query.proccesingStatus = { $in: status.split(',') };
+      }
+      ////
+      const endDateUTC = dateConverterUTC(endDate);
+
+      // Cộng thêm một ngày
+      endDateUTC.setDate(endDateUTC.getDate() + 1);
+
+      // Tạo một đối tượng `Date` mới chứa ngày đã được cộng thêm
+      const newEndDate = new Date(endDateUTC);
+      //////
+      // console.log('start: ', new Date(dateConverterUTC(startDate)))
+      // console.log('end: ', newEndDate)
+      // console.log('datef: ', new Date((startDate)).setUTCHours(0, 0, 0, 0))
+      // console.log('datel: ', new Date((endDate)).setUTCHours(23, 59, 59, 999))
+      // console.log('date1: ', new Date(new Date((startDate)).setUTCHours(0, 0, 0, 0)))
+      // console.log('date2: ', new Date(new Date((endDate)).setUTCHours(23, 59, 59, 999)))
+
+      if (startDate && endDate) {
+         query.createdAt = {
+            $gte: new Date(dateConverterUTC(startDate)),
+            $lte: newEndDate
+         };
+      } else if (startDate) {
+         query.createdAt = { $gte: new Date(dateConverterUTC(startDate)) };
+      } else if (endDate) {
+         query.createdAt = { $lte: newEndDate };
+      }
+
+      const order = await Order.find(query)
+         .limit(limit ? parseInt(limit) : 10)
+         .skip(page ? (parseInt(page) - 1) * limit : 0)
+         .sort({ createdAt: -1 })
+
+      const totalPage = await Order.countDocuments(query);
       return {
          order,
          totalPage
@@ -79,14 +174,14 @@ const getOrdersUserById = async (id, query) => {
 }
 const updateOrder = async (id, updateData) => {
    try {
-      
+
       const order = await Order.findById(id).exec();
       console.log("cc: ", order);
       if (!order) {
          throw new Error('Order not found');
       }
       const newOrder = { ...order._doc, ...updateData }
-      console.log("neworder: ",  order);
+      console.log("neworder: ", order);
 
       // product.name = update.name ?? product.name
       // product.price = update.price ?? product.price
@@ -106,10 +201,61 @@ const updateOrder = async (id, updateData) => {
       throw new Error('Failed update order');
    }
 }
+const groupBy = (array, key) => {
+   return array.reduce((result, currentValue) => {
+      (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
+      return result;
+   }, {});
+};
+const getRevenueSummary = async (body) => {
+   const startDate = body.startDate
+   const endDate = body.endDate
+   console.log('body: ', body)
+   const orders = await Order.find({}, { createdAt: 1, totalPrice: 1 }).exec()
+   const newOrder = orders.map(order => {
+      return {
+         createdAt: format(new Date(order.createdAt), 'yyyy-MM-dd'),
+         totalPrice: order.totalPrice
+      }
+   })
+
+   // Endpoint cho doanh thu hàng ngày
+   const filteredOrders = newOrder.filter(order => order.createdAt >= startDate && order.createdAt <= endDate);
+   const groupedOrders = groupBy(filteredOrders, 'createdAt');
+   const dailyRevenue = Object.keys(groupedOrders).map(date => ({
+      date,
+      revenue: groupedOrders[date].reduce((sum, order) => {
+         sum += Number(order.totalPrice.replace(/\./g, ''))
+         console.log('or: ', order)
+         return sum
+      }, 0),
+   }));
+   // res.json(dailyRevenue);
+
+   return dailyRevenue
+   // try {
+   //    // Tính toán doanh thu hàng tuần
+   //    const weeklyRevenue = calculateWeeklyRevenue(revenueData);
+
+   //    // Tính toán doanh thu hàng tháng
+   //    const monthlyRevenue = calculateMonthlyRevenue(revenueData);
+
+   //    // Tính toán doanh thu hàng năm
+   //    const yearlyRevenue = calculateYearlyRevenue(revenueData);
+
+   //    res.json({ weeklyRevenue, monthlyRevenue, yearlyRevenue });
+
+   //    const orderUpdated = await Order.findByIdAndUpdate(id, newOrder, { new: true }).exec()
+   //    return orderUpdated
+   // } catch (error) {
+   //    throw new Error('Failed update order');
+   // }
+}
 export default {
    getAllOrder,
    createOrder,
    getOrdersUserById,
    getOrderDetailsById,
-   updateOrder
+   updateOrder,
+   getRevenueSummary
 }

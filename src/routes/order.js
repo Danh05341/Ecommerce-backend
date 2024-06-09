@@ -8,5 +8,7 @@ router.post('/', orderController.createOrder);
 router.put('/:id', orderController.updateOrder);
 router.get('/user/:id', orderController.getOrdersUserById);
 router.get('/details/:id', orderController.getOrderDetailsById);
+router.post('/revenue-summary', orderController.getRevenueSummary);
+
 
 export default router;
