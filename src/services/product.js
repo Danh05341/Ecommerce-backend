@@ -17,13 +17,14 @@ const getAllProduct = async (query) => {
     // const { page, search, sort, brand, price, size } = query
 
     const page = query.page || 1
+    const sort = query.sort || 'descending'
     const search = query.search || ""
-    const sort = query.sort || 'desc'
     // brands trả về [] nếu query {}
     // chuỗi rỗng để split không bị lỗi
     // const brands = [...(query.brands || '').split(',')]
     const brands = query.brands ? [...query.brands.split(',')] : []
-    const price = query.price || ""
+    const minPrice = parseInt(query.minPrice) || 0
+    const maxPrice = parseInt(query.maxPrice) || 999999999999
     const size = query.size || ""
     const limit = 12
     const skip = (page - 1) * limit
@@ -32,33 +33,94 @@ const getAllProduct = async (query) => {
     let product = []
     let totalProduct = 0
     let brandNames = []
-    // TH1: brands trả về []
-    if (brands.length > 0) {
-        console.log('TH1: ', brands)
+    // // TH1: brands trả về []
+    // if (brands.length > 0) {
+    //     console.log('TH1: ', brands)
 
-        product = await Product.find({ brand_id: { $in: brandIds } }).populate({
-            path: 'brand_id',
-            // match: { name: { $in: brands } },
-            // select: 'name -_id'
-        }).skip(skip).limit(limit).exec()
-        totalProduct = await Product.countDocuments({ brand_id: { $in: brandIds } }).exec()
+    //     product = await Product.find({ brand_id: { $in: brandIds } }).sort({price: sort}).collation({locale: "en_US", numericOrdering: true}).populate({
+    //         path: 'brand_id',
+    //         // match: { name: { $in: brands } },
+    //         // select: 'name -_id'
+    //     }).skip(skip).limit(limit).exec()
+    //     totalProduct = await Product.countDocuments({ brand_id: { $in: brandIds } }).exec()
 
-    } else {
-        // TH2: brands trả về [] brand_id
-        console.log('TH2: ', brands)
+    // } else {
+    //     // TH2: brands trả về [] brand_id
+    //     console.log('TH2: ', brands)
 
-        product = await Product.find({}).populate({
-            path: 'brand_id',
-            // match: { name: { $in: brands } },
-            // select: 'name -_id'
-        }).skip(skip).limit(limit).exec()
-        totalProduct = await Product.countDocuments({}).exec()
-    }
+    //     product = await Product.find({}).populate({
+    //         path: 'brand_id',
+    //         // match: { name: { $in: brands } },
+    //         // select: 'name -_id'
+    //     }).skip(skip).limit(limit).sort({price: sort}).collation({locale: "en_US", numericOrdering: true}).exec()
+    //     totalProduct = await Product.countDocuments({}).exec()
+    // }
 
-    console.log('count: ', totalProduct)
-    const totalPage = Math.ceil(totalProduct / 12)
+    // console.log('count: ', totalProduct)
+    // const totalPage = Math.ceil(totalProduct / 12)
 
-    brandNames = await Brand.find({}).exec()
+    // brandNames = await Brand.find({}).exec()
+    const sortDirection = sort === 'ascending' ? 1 : -1;
+
+    const matchConditions = brands.length > 0 ? { brand_id: { $in: brandIds } } : {};
+    
+    const aggregationPipeline = [
+        { $match: matchConditions },
+        {
+            $addFields: {
+                priceInt: {
+                    $toInt: {
+                        $replaceAll: {
+                            input: { $replaceAll: { input: "$price", find: ".", replacement: "" } },
+                            find: ",",
+                            replacement: ""
+                        }
+                        // Trong aggregationPipeline, chúng ta sử dụng $replaceAll để loại bỏ cả dấu chấm và dấu phẩy trước khi chuyển đổi giá trị chuỗi thành số nguyên. 
+                        // Điều này sẽ đảm bảo rằng chuỗi có định dạng như 1.200.000 và 550,000 sẽ được chuyển đổi đúng cách thành số nguyên để sắp xếp.
+                    }
+                }
+            }
+        },
+        { $match: { priceInt: { $gte: minPrice, $lte: maxPrice } } },  // Thêm điều kiện lọc giá sau khi chuyển đổi priceInt
+        { $sort: { priceInt: sortDirection } },
+        { $skip: skip },
+        { $limit: limit },
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'brand_id',
+                foreignField: '_id',
+                as: 'brand_id'
+            }
+        },
+        { $unwind: "$brand_id" }
+    ];
+
+    const totalProductsPipeline = [
+        { $match: matchConditions },
+        {
+            $addFields: {
+                priceInt: {
+                    $toInt: {
+                        $replaceAll: {
+                            input: { $replaceAll: { input: "$price", find: ".", replacement: "" } },
+                            find: ",",
+                            replacement: ""
+                        }
+                    }
+                }
+            }
+        },
+        { $match: { priceInt: { $gte: minPrice, $lte: maxPrice } } },  // Thêm điều kiện lọc giá sau khi chuyển đổi priceInt
+        { $count: "total" }
+    ];
+
+    product = await Product.aggregate(aggregationPipeline).exec();
+    const totalProductsResult = await Product.aggregate(totalProductsPipeline).exec();
+    totalProduct = totalProductsResult.length > 0 ? totalProductsResult[0].total : 0;
+
+    const totalPage = Math.ceil(totalProduct / limit);
+    brandNames = await Brand.find({}).exec();
     return {
         product,
         totalPage,
@@ -67,65 +129,150 @@ const getAllProduct = async (query) => {
 }
 
 const getProductBySlug = async (slug, query) => {
-    // const { page, search, sort, brand, price, size } = query
-    // console.log(page, search, sort, brand, price, size)
-    let product = []
-    let totalProduct = 0
-    let brandNames = []
 
-    product = await Product.findOne({ slug: slug }).populate('brand_id').exec()
+    // let product = []
+    // let totalProduct = 0
+    // let brandNames = []
 
-    // Nếu không tìm thấy product = null
-    if (product) return {
-        product
-    }
-    console.log('product2:')
+    // product = await Product.findOne({ slug: slug }).populate('brand_id').exec()
 
-    const categoryParent = await Category.findOne({ slug: slug }).distinct('name').exec()
-    const categoryWithChildren = await getCategoriesWithChildren(categoryParent)
-    const categoryChildren = getAllCategoryNames(categoryWithChildren)
+    // // Nếu không tìm thấy product = null
+    // if (product) return {
+    //     product
+    // }
+    // console.log('product2:')
 
-    // Mảng tên danh mục
-    const categoryNames = categoryParent.concat(categoryChildren)
-    // console.log(categoryNames)
+    // const categoryParent = await Category.findOne({ slug: slug }).distinct('name').exec()
+    // const categoryWithChildren = await getCategoriesWithChildren(categoryParent)
+    // const categoryChildren = getAllCategoryNames(categoryWithChildren)
 
-    const page = query.page || 1
-    const search = query.search || ""
-    const sort = query.sort || 'desc'
-    const brands = query.brands ? [...query.brands.split(',')] : []
-    const price = query.price || ""
-    const size = query.size || ""
+    // // Mảng tên danh mục
+    // const categoryNames = categoryParent.concat(categoryChildren)
+    // // console.log(categoryNames)
 
-    const limit = 12
-    const skip = (page - 1) * limit
+    // const page = query.page || 1
+    // const search = query.search || ""
+    // const sort = query.sort || 'descending'
+    // const brands = query.brands ? [...query.brands.split(',')] : []
+    // const price = query.price || ""
+    // const size = query.size || ""
 
-    // TH1: brands trả về []
-    if (brands.length > 0) {
-        console.log('TH1: ', brands)
-        // mảng brand Id của checkbox
-        const brandIds = await Brand.find({ name: { $in: brands } }).distinct('_id').exec()
-        product = await Product.find({ category: categoryNames, brand_id: { $in: brandIds } }).skip(skip).limit(limit).populate('brand_id').exec()
-        totalProduct = await Product.countDocuments({ category: categoryNames, brand_id: { $in: brandIds } }).exec()
+    // const limit = 12
+    // const skip = (page - 1) * limit
 
-    } else {
-        // TH2: brands trả về [] brand_id
-        console.log('TH2: ', brands)
-        product = await Product.find({ category: categoryNames }).skip(skip).limit(limit).populate('brand_id').exec()
-        totalProduct = await Product.countDocuments({ category: categoryNames }).exec()
-    }
+    // // TH1: brands trả về []
+    // if (brands.length > 0) {
+    //     console.log('TH1: ', brands)
+    //     // mảng brand Id của checkbox
+    //     const brandIds = await Brand.find({ name: { $in: brands } }).distinct('_id').exec()
+    //     product = await Product.find({ category: categoryNames, brand_id: { $in: brandIds } }).skip(skip).limit(limit).populate('brand_id').sort({ price: sort }).collation({ locale: "en_US", numericOrdering: true }).exec()
+    //     totalProduct = await Product.countDocuments({ category: categoryNames, brand_id: { $in: brandIds } }).exec()
 
-    console.log('count: ', totalProduct)
+    // } else {
+    //     // TH2: brands trả về [] brand_id
+    //     console.log('TH2: ', brands)
+    //     product = await Product.find({ category: categoryNames }).skip(skip).limit(limit).sort({ price: sort }).collation({ locale: "en_US", numericOrdering: true }).populate('brand_id').exec()
+    //     totalProduct = await Product.countDocuments({ category: categoryNames }).exec()
+    // }
 
-    // product = await Product.find({ category: categoryNames }).skip(skip).limit(limit).populate('brand_id').exec()
-    // const totalProduct = await Product.countDocuments({ category: categoryNames }).exec()
-    const totalPage = Math.ceil(totalProduct / 12)
+    // console.log('count: ', totalProduct)
 
-    // mảng brand Id của mỗi danh mục
-    const brandIds = await Product.find({ category: categoryNames }).distinct('brand_id').exec()
-    if (brandIds) {
-        brandNames = await Brand.find({ _id: brandIds }).exec()
-    }
+    // // product = await Product.find({ category: categoryNames }).skip(skip).limit(limit).populate('brand_id').exec()
+    // // const totalProduct = await Product.countDocuments({ category: categoryNames }).exec()
+    // const totalPage = Math.ceil(totalProduct / 12)
 
+    // // mảng brand Id của mỗi danh mục
+    // const brandIds = await Product.find({ category: categoryNames }).distinct('brand_id').exec()
+    // if (brandIds) {
+    //     brandNames = await Brand.find({ _id: brandIds }).exec()
+    // }
+    // Tìm sản phẩm theo slug
+    let product = await Product.findOne({ slug: slug }).populate('brand_id').exec();
+
+    if (product) return { product };
+
+    // Lấy thông tin danh mục
+    const categoryParent = await Category.findOne({ slug: slug }).distinct('name').exec();
+    const categoryWithChildren = await getCategoriesWithChildren(categoryParent);
+    const categoryChildren = getAllCategoryNames(categoryWithChildren);
+    const categoryNames = categoryParent.concat(categoryChildren);
+
+    // Thiết lập các tham số truy vấn
+    const page = query.page || 1;
+    const minPrice = parseInt(query.minPrice) || 0
+    const maxPrice = parseInt(query.maxPrice) || 999999999999
+    const sort = query.sort || 'descending';
+    const brands = query.brands ? [...query.brands.split(',')] : [];
+    const limit = 12;
+    const skip = (page - 1) * limit;
+    const sortDirection = sort === 'ascending' ? 1 : -1;
+
+    // Điều kiện lọc sản phẩm
+    const matchConditions = brands.length > 0
+        ? {
+            category: { $in: categoryNames },
+            brand_id: { $in: await Brand.find({ name: { $in: brands } }).distinct('_id').exec() }
+        }
+        : { category: { $in: categoryNames } };
+
+    // Pipeline để lấy sản phẩm và sắp xếp theo giá
+    const aggregationPipeline = [
+        { $match: matchConditions },
+        {
+            $addFields: {
+                priceInt: {
+                    $convert: {
+                        input: { $replaceAll: { input: "$price", find: ".", replacement: "" } },
+                        to: "int",
+                        onError: 0
+                    }
+                }
+            }
+        },
+        { $match: { priceInt: { $gte: minPrice, $lte: maxPrice } } },  // Thêm điều kiện lọc giá sau khi chuyển đổi priceInt
+        { $sort: { priceInt: sortDirection } },
+        { $skip: skip },
+        { $limit: limit },
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'brand_id',
+                foreignField: '_id',
+                as: 'brand_id'
+            }
+        },
+        { $unwind: "$brand_id" }
+    ];
+
+    // Pipeline để đếm tổng số sản phẩm
+    const totalProductsPipeline = [
+        { $match: matchConditions },
+        {
+            $addFields: {
+                priceInt: {
+                    $toInt: {
+                        $replaceAll: {
+                            input: { $replaceAll: { input: "$price", find: ".", replacement: "" } },
+                            find: ",",
+                            replacement: ""
+                        }
+                    }
+                }
+            }
+        },
+        { $match: { priceInt: { $gte: minPrice, $lte: maxPrice } } },  // Thêm điều kiện lọc giá sau khi chuyển đổi priceInt
+        { $count: "total" }
+    ];
+
+    // Thực hiện truy vấn
+    product = await Product.aggregate(aggregationPipeline).exec();
+    const totalProductsResult = await Product.aggregate(totalProductsPipeline).exec();
+    const totalProduct = totalProductsResult.length > 0 ? totalProductsResult[0].total : 0;
+    const totalPage = Math.ceil(totalProduct / limit);
+
+    // Lấy tên thương hiệu
+    const brandIds = await Product.find({ category: { $in: categoryNames } }).distinct('brand_id').exec();
+    const brandNames = brandIds.length > 0 ? await Brand.find({ _id: { $in: brandIds } }).exec() : [];
     return {
         product,
         totalPage,
@@ -138,7 +285,7 @@ const updateProduct = async (id, update) => {
     if (!productData) {
         throw new Error('Product not found');
     }
-    const product = {...productData._doc}
+    const product = { ...productData._doc }
     product.name = update.name ?? product.name
     product.price = update.price ?? product.price
     product.sale_price = update.sale_price ?? product.sale_price

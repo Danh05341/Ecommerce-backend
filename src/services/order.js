@@ -210,8 +210,7 @@ const groupBy = (array, key) => {
 const getRevenueSummary = async (body) => {
    const startDate = body.startDate
    const endDate = body.endDate
-   console.log('body: ', body)
-   const orders = await Order.find({}, { createdAt: 1, totalPrice: 1 }).exec()
+   const orders = await Order.find({proccesingStatus: 'finish'}, { createdAt: 1, totalPrice: 1 }).exec()
    const newOrder = orders.map(order => {
       return {
          createdAt: format(new Date(order.createdAt), 'yyyy-MM-dd'),
@@ -230,26 +229,9 @@ const getRevenueSummary = async (body) => {
          return sum
       }, 0),
    }));
-   // res.json(dailyRevenue);
 
    return dailyRevenue
-   // try {
-   //    // Tính toán doanh thu hàng tuần
-   //    const weeklyRevenue = calculateWeeklyRevenue(revenueData);
-
-   //    // Tính toán doanh thu hàng tháng
-   //    const monthlyRevenue = calculateMonthlyRevenue(revenueData);
-
-   //    // Tính toán doanh thu hàng năm
-   //    const yearlyRevenue = calculateYearlyRevenue(revenueData);
-
-   //    res.json({ weeklyRevenue, monthlyRevenue, yearlyRevenue });
-
-   //    const orderUpdated = await Order.findByIdAndUpdate(id, newOrder, { new: true }).exec()
-   //    return orderUpdated
-   // } catch (error) {
-   //    throw new Error('Failed update order');
-   // }
+   
 }
 export default {
    getAllOrder,
