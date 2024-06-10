@@ -50,6 +50,7 @@ const getProductBySlug = async (req, res) => {
             data: result.product,
             totalPage: result.totalPage,
             brandNames: result.brandNames,
+            sizes: result.sizeList
         })
     } catch (error) {
         return res.status(400).json({

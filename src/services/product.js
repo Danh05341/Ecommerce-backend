@@ -25,7 +25,7 @@ const getAllProduct = async (query) => {
     const brands = query.brands ? [...query.brands.split(',')] : []
     const minPrice = parseInt(query.minPrice) || 0
     const maxPrice = parseInt(query.maxPrice) || 999999999999
-    const size = query.size || ""
+    const sizes = query.size ? query.size.split(',') : []
     const limit = 12
     const skip = (page - 1) * limit
 
@@ -62,8 +62,24 @@ const getAllProduct = async (query) => {
     // brandNames = await Brand.find({}).exec()
     const sortDirection = sort === 'ascending' ? 1 : -1;
 
-    const matchConditions = brands.length > 0 ? { brand_id: { $in: brandIds } } : {};
-    
+    // const matchConditions = brands.length > 0 ?
+    //     {
+    //         brand_id: { $in: brandIds },
+    //         ...(sizes.length > 0 && { 'size.size': { $in: sizes }, }),
+    //         ...(search && { size: { $regex: search } })
+    //     } :
+    //     {
+    //         ...(sizes.length > 0 && { 'size.size': { $in: sizes } }),
+    //         ...(search && { size: { $regex: search } })
+    //     };
+    const matchConditions =
+    {
+        ...(brands.length > 0 && { brand_id: { $in: brandIds } }),
+        ...(sizes.length > 0 && { 'size.size': { $in: sizes }, }),
+        ...(search && { name: { $regex: search, $options: 'i' } })
+    }
+
+
     const aggregationPipeline = [
         { $match: matchConditions },
         {
@@ -121,10 +137,12 @@ const getAllProduct = async (query) => {
 
     const totalPage = Math.ceil(totalProduct / limit);
     brandNames = await Brand.find({}).exec();
+    const sizeList = await Product.find({}).distinct('size.size').exec()
     return {
         product,
         totalPage,
-        brandNames
+        brandNames,
+        sizeList
     }
 }
 
@@ -202,6 +220,9 @@ const getProductBySlug = async (slug, query) => {
     const minPrice = parseInt(query.minPrice) || 0
     const maxPrice = parseInt(query.maxPrice) || 999999999999
     const sort = query.sort || 'descending';
+    const sizes = query.size ? query.size.split(',') : []
+    const search = query.search || ""
+
     const brands = query.brands ? [...query.brands.split(',')] : [];
     const limit = 12;
     const skip = (page - 1) * limit;
@@ -211,9 +232,15 @@ const getProductBySlug = async (slug, query) => {
     const matchConditions = brands.length > 0
         ? {
             category: { $in: categoryNames },
-            brand_id: { $in: await Brand.find({ name: { $in: brands } }).distinct('_id').exec() }
+            brand_id: { $in: await Brand.find({ name: { $in: brands } }).distinct('_id').exec() },
+            ...(sizes.length > 0 && { 'size.size': { $in: sizes } }),
+            ...(search && { name: { $regex: search, $options: 'i' } })
         }
-        : { category: { $in: categoryNames } };
+        : {
+            category: { $in: categoryNames },
+            ...(sizes.length > 0 && { 'size.size': { $in: sizes } }),
+            ...(search && { name: { $regex: search, $options: 'i' } })
+        };
 
     // Pipeline để lấy sản phẩm và sắp xếp theo giá
     const aggregationPipeline = [
@@ -273,10 +300,13 @@ const getProductBySlug = async (slug, query) => {
     // Lấy tên thương hiệu
     const brandIds = await Product.find({ category: { $in: categoryNames } }).distinct('brand_id').exec();
     const brandNames = brandIds.length > 0 ? await Brand.find({ _id: { $in: brandIds } }).exec() : [];
+    const sizeList = await Product.find({ category: { $in: categoryNames } }).distinct('size.size').exec()
+
     return {
         product,
         totalPage,
-        brandNames
+        brandNames,
+        sizeList
     }
 }
 
