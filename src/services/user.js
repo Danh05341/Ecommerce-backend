@@ -1,4 +1,4 @@
-import { User } from '../models/index.js';
+import { Cart, User } from '../models/index.js';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
@@ -17,12 +17,16 @@ const register = async ({
         password,
         parseInt(process.env.SALT_ROUND)
     );
+    const cart = new Cart()
+    await cart.save();
+
     const newUser = await User.create({
         firstName,
         lastName,
         email,
         password: hashPassword,
-        image
+        image,
+        cart_id: cart._id
     })
     return {
         ...newUser._doc,
