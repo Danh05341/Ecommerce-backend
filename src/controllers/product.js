@@ -1,10 +1,9 @@
 import { productService } from '../services/index.js'
 
 const addProduct = async (req, res) => {
-    const { name, category, image, price, description } = req.body;
-
+    const { name, description, category, image, price, size, brand_id, slug, status, total } = req.body;
     try {
-        const newProduct = await productService.addProduct({ name, category, image, price, description })
+        const newProduct = await productService.addProduct({ name, description, category, image, price, size, brand_id, slug, status, total })
         return res.status(200).json({
             message: 'Add product successfully',
             data: newProduct
@@ -23,7 +22,7 @@ const getAllProduct = async (req, res) => {
         return res.status(200).json({
             message: 'Get all product successfully',
             data: products
-            
+
         })
     } catch (error) {
         return res.status(400).json({
@@ -37,7 +36,7 @@ const getProductBySlug = async (req, res) => {
         const query = req.query
 
         const slug = req.params.slug
-        
+
         let result = []
         if (req.params.slug === 'all') {
             result = await productService.getAllProduct(query)
@@ -76,16 +75,15 @@ const updateProduct = async (req, res) => {
 }
 const deleteProducts = async (req, res) => {
     try {
-        const updatedProduct = req.body
-        const product = await productService.updateProduct(req.params.id, updatedProduct)
+        const product = await productService.deleteProducts(req.params.id)
         return res.status(200).json({
-            message: 'Update product successfully',
+            message: 'Delête product successfully',
             data: product
         })
     } catch (error) {
         return res.json({
             error: error.toString(),
-            message: "Update product failed"
+            message: "Delête product failed"
         })
     }
 }

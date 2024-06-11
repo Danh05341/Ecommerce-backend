@@ -2,8 +2,8 @@ import { Brand, Category, Product } from '../models/index.js';
 import { getCategoriesWithChildren, getAllCategoryNames } from '../utils/category.js';
 import brand from './brand.js';
 
-const addProduct = async ({ name, category, image, price, description }) => {
-    const newProduct = await Product.create({ name, category, image, price, description })
+const addProduct = async ({ name, description, category, image, price, size, brand_id, slug, status, total }) => {
+    const newProduct = await Product.create({ name, description, category, image, price, size, brand_id, slug, status, total })
     return {
         ...newProduct.toObject()
     }
@@ -332,8 +332,8 @@ const updateProduct = async (id, update) => {
     return productUpdated
 }
 
-const deleteProducts = async (id, dataToDelete) => {
-    const result = await Product.deleteMany({ 'size.size': { $in: idsToDelete } });
+const deleteProducts = async (id) => {
+    const result = await Product.deleteOne({ _id: id });
     return result
 }
 
