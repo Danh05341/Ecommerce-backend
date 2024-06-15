@@ -35,6 +35,35 @@ const register = async ({
 
 }
 
+
+const createUser = async ({
+    name, email, password, role 
+}) => {
+    const existingUser = await User.findOne({ email }).exec();
+    if (existingUser) {
+        throw new Error('User already exists');
+    }
+    const hashPassword = await bcrypt.hash(
+        password,
+        parseInt(process.env.SALT_ROUND)
+    );
+    const cart = new Cart()
+    await cart.save();
+
+    const newUser = await User.create({
+        firstName: name,
+        email,
+        password: hashPassword,
+        cart_id: cart._id,
+        role
+    })
+    return {
+        ...newUser._doc,
+        password: "not show"
+    }
+
+}
+
 const generateAccesstoken = async (id) => {
     return (
         await jwt.sign(
@@ -103,10 +132,32 @@ const getUserById = async (id) => {
     return user
 }
 
+const getAllUsers = async () => {
+    const user = await User.find({});
+    if (!user) throw new Error('User not found')
+    return user
+}
 
+const updateUserById = async (id, updateData) => {
+    const user = await User.findById(id).exec();
+    if (!user) throw new Error('User not found')
+    const newUser = { ...user._doc, ...updateData }
+    const userUpdated = await User.findByIdAndUpdate(id, newUser, { new: true }).exec()
+    return userUpdated
+}
+
+const deleteUserById = async (id) => {
+    const userDeleted = await User.findByIdAndDelete(id).exec();
+    await Cart.findByIdAndDelete(userDeleted.cart_id).exec();
+    return userDeleted
+}   
 export default {
     register,
+    createUser,
     login,
     refreshToken,
-    getUserById
+    getUserById,
+    getAllUsers,
+    updateUserById,
+    deleteUserById
 }

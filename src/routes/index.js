@@ -9,6 +9,7 @@ import uploadRouter from './upload.js'
 import provinceRouter from './province.js'
 import paymentRouter from './payment.js'
 import orderRouter from './order.js'
+import discountRouter from './discount.js'
 
 function route(app) {
     app.use('/users', userRouter)
@@ -22,6 +23,7 @@ function route(app) {
     app.use('/province', provinceRouter)
     app.use('/payment', paymentRouter)
     app.use('/order', orderRouter)
+    app.use('/discount', discountRouter)
 }
 
 export default route;

@@ -8,6 +8,7 @@ import Cart from './Cart.js'
 import Payment from './Payment.js'
 import Province from './Province.js'
 import Order from './Order.js'
+import Discount from './Discount.js'
 
 export {
     User,
@@ -19,5 +20,6 @@ export {
     Cart,
     Payment,
     Province,
-    Order
+    Order,
+    Discount
 }

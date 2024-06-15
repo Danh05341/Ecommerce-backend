@@ -21,6 +21,24 @@ const register = async (req, res) => {
         })
     }
 }
+
+const createUser = async (req, res) => {
+    const { name, email, password, role } = req.body;
+    try {
+        const user = await userService.createUser({
+            name, email, password, role 
+        })
+        return res.status(200).json({
+            message: 'Create user successfully',
+            data: user
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "error creating user"
+        })
+    }
+}
 const login = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -69,9 +87,58 @@ const getUserById = async (req, res) => {
         })
     }
 }
+const getAllUsers = async (req, res) => {
+    try {
+        const existingUser = await userService.getAllUsers()
+        if(!existingUser) throw new Error('User not found')
+        return res.status(200).json({
+            message: 'Get List user successfully',
+            data: existingUser
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "Get List user failed"
+        })
+    }
+}
+const updateUserById = async (req, res) => {
+    try {
+        const updatedUser = await userService.updateUserById(req.params.id, req.body)
+        return res.status(200).json({
+            message: 'Update user successfully',
+            data: updatedUser
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "Update user failed"
+        })
+    }
+}
+
+
+const deleteUserById = async (req, res) => {
+    try {
+        const deletedUser = await userService.deleteUserById(req.params.id)
+        return res.status(200).json({
+            message: 'deleted User successfully',
+            data: deletedUser
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "deleted User failed"
+        })
+    }
+}
 export default {
     register,
+    createUser,
     login,
     refreshToken,
-    getUserById
+    getUserById,
+    getAllUsers,
+    updateUserById,
+    deleteUserById
 }

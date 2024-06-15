@@ -9,6 +9,7 @@ import uploadController from './upload.js'
 import provinceController from './province.js'
 import paymentController from './payment.js'
 import orderController from './order.js'
+import discountController from './discount.js'
 
 export {
     userController,
@@ -21,5 +22,6 @@ export {
     uploadController,
     provinceController,
     paymentController,
-    orderController
+    orderController,
+    discountController
 }
