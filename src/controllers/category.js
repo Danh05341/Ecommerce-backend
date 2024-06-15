@@ -40,9 +40,58 @@ const uploadImage = async (req, res) => {
         })
     }
 }
+const quantityProduct = async (req, res) => {
+    try {
+        const category = await categoryService.quantityProduct(req.query)
+        return res.status(200).json({
+            message: 'Get Category quantity product successfully',
+            data: category
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "Get Category quantity product failed"
+        })
+    }
+}
+
+const createCategory = async (req, res) => {
+    
+    try {
+        const category = await categoryService.createCategory(req.body)
+        return res.status(200).json({
+            message: 'Create category successfully',
+            data: category
+        })
+    } catch (error) {
+        return res.status(400).json({
+            error: error.toString(),
+            message: "Create category failed"
+        })
+    }
+}
+
+const deleteManyCategory = async (req, res) => {
+    
+    try {
+        const category = await categoryService.deleteManyCategory(req.body)
+        return res.status(200).json({
+            message: 'Delete category successfully',
+            data: category
+        })
+    } catch (error) {
+        return res.status(400).json({
+            error: error.toString(),
+            message: "Delete category failed"
+        })
+    }
+}
 
 export default {
     getAllCategory,
     uploadImage,
-    getCategoryBySlug
+    getCategoryBySlug,
+    quantityProduct,
+    createCategory,
+    deleteManyCategory
 }

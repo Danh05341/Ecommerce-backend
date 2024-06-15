@@ -28,7 +28,7 @@ const getAllProduct = async (query) => {
     const sizes = query.size ? query.size.split(',') : []
     const limit = 12
     const skip = (page - 1) * limit
-
+    console.log('search1: ', search)
     const brandIds = await Brand.find({ name: { $in: brands } }).distinct('_id').exec()
     let product = []
     let totalProduct = 0
@@ -222,6 +222,7 @@ const getProductBySlug = async (slug, query) => {
     const sort = query.sort || 'descending';
     const sizes = query.size ? query.size.split(',') : []
     const search = query.search || ""
+    console.log('search1: ', search)
 
     const brands = query.brands ? [...query.brands.split(',')] : [];
     const limit = 12;
