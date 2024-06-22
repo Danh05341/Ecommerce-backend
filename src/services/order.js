@@ -1,4 +1,4 @@
-import { Order } from '../models/index.js';
+import { Discount, Order } from '../models/index.js';
 import { format } from 'date-fns';
 const PAGE_LIMIT = 10
 import { dateConverterUTC } from '../utils/date.js';
@@ -84,15 +84,21 @@ const createOrder = async ({ email, name, phone, address, city, district, ward, 
          shippingFee,
          paymentMethod,
          productsOrder,
-         userId
+         userId,
       };
 
       // Conditionally add discount fields if they are provided
-      if (discountCode) {
+      if (discountCode && discount) {
          orderData.discountCode = discountCode;
       }
       if (discount) {
          orderData.discountAmount = discount;
+         const discountCurrent = await Discount.findOne({code: discountCode});
+         discountCurrent.timesUsed += 1;
+         if (discountCurrent.timesUsed >= discountCurrent.maxUses) {
+            discountCurrent.isActive = false;
+         }
+         await discountCurrent.save();
       }
 
       // Create a new Order object

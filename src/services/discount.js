@@ -1,9 +1,12 @@
 
 import { Discount } from '../models/index.js';
-
-const createDiscount = async ({ code, amount }) => {
-
-    const newDiscount = new Discount({ code, amount });
+import { dateConverterPlus7 } from '../utils/date.js';
+const createDiscount = async ({ code, amount, startDate, endDate, maxUses }) => {
+    const discount = await Discount.find({ code }).exec()
+    console.log('discount', discount)
+    if (discount.length > 0) throw new Error('Mã giảm giá đã tồn tại')
+    const newEndDate = new Date(endDate).setHours(23, 59, 59, 999)
+    const newDiscount = new Discount({ code, amount, startDate, endDate: newEndDate, maxUses });
     await newDiscount.save();
     return newDiscount
 }
@@ -23,10 +26,16 @@ const getDiscountsList = async () => {
 const updateDiscount = async (id, updateData) => {
     const discount = await Discount.findById(id).exec();
     if (!discount) {
-       throw new Error('Discount not found');
+        throw new Error('Discount not found');
     }
     const newDiscount = { ...discount._doc, ...updateData }
-
+    console.log('updateData.maxUses: ', updateData.maxUses)
+    console.log('discount.timesUsed: ', discount.timesUsed)
+    if (updateData.maxUses <= discount.timesUsed) {
+        newDiscount.isActive = false;
+    } else {
+        newDiscount.isActive = true;
+    }
     const discountUpdated = await Discount.findByIdAndUpdate(id, newDiscount, { new: true }).exec()
     return discountUpdated
 }
@@ -36,10 +45,30 @@ const deleteDiscount = async (id) => {
     return discountDeleted
 }
 
+const applyDiscount = async (code) => {
+    const discount = await Discount.findOne({ code }).exec();
+    if (!discount) throw new Error('Discount not found')
+
+    const now = dateConverterPlus7(new Date())
+
+    // Kiểm tra xem mã giảm giá còn hoạt động không
+    if (!discount.isActive || now < discount.startDate || now > discount.endDate) {
+        throw new Error('Mã giảm giá không hợp lệ hoặc đã hết hạn');
+    }
+
+    // Kiểm tra số lần sử dụng
+    if (discount.timesUsed >= discount.maxUses) {
+        throw new Error('Mã giảm giá đã đạt giới hạn sử dụng');
+    }
+
+    return discount
+}
+
 export default {
     createDiscount,
     getDiscount,
     getDiscountsList,
     updateDiscount,
-    deleteDiscount
+    deleteDiscount,
+    applyDiscount
 }

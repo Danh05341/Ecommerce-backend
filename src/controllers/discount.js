@@ -2,9 +2,9 @@
 import { discountService } from '../services/index.js'
 
 const createDiscount = async (req, res) => {
-    const { code, amount } = req.body;
+    const { code, amount, startDate, endDate, maxUses } = req.body;
     try {
-        const discount = await discountService.createDiscount({ code, amount } )
+        const discount = await discountService.createDiscount({ code, amount, startDate, endDate, maxUses })
         return res.status(200).json({
             message: 'Create Discount successfully',
             data: discount
@@ -76,11 +76,27 @@ const deleteDiscount = async (req, res) => {
         })
     }
 }
+const applyDiscount = async (req, res) => {
+    try {
+        const { code } = req.body
+        const discount = await discountService.applyDiscount(code)
+        return res.status(200).json({
+            message: 'apply Discount successfully',
+            data: discount
+        })
+    } catch (error) {
+        return res.json({
+            error: error.toString(),
+            message: "apply Discount failed"
+        })
+    }
+}
 
 export default {
     createDiscount,
     getDiscount,
     getDiscountsList,
     updateDiscount,
-    deleteDiscount
+    deleteDiscount,
+    applyDiscount
 }
