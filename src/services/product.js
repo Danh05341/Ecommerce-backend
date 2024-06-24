@@ -318,7 +318,7 @@ const updateProduct = async (id, update) => {
     }
     const product = { ...productData._doc }
     product.name = update.name ?? product.name
-    product.price = update.price ?? product.price
+    product.price = update?.size[0]?.price ?? product.price
     product.sale_price = update.sale_price ?? product.sale_price
     product.image = update.image ?? product.image
     product.description = update.description ?? product.description

@@ -10,6 +10,7 @@ import provinceRouter from './province.js'
 import paymentRouter from './payment.js'
 import orderRouter from './order.js'
 import discountRouter from './discount.js'
+import reviewRouter from './review.js'
 
 function route(app) {
     app.use('/users', userRouter)
@@ -24,6 +25,7 @@ function route(app) {
     app.use('/payment', paymentRouter)
     app.use('/order', orderRouter)
     app.use('/discount', discountRouter)
+    app.use('/review', reviewRouter)
 }
 
 export default route;

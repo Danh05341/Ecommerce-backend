@@ -8,6 +8,7 @@ import cartService from "./cart.js";
 import paymentService from "./payment.js";
 import orderService from "./order.js";
 import discountService from "./discount.js";
+import reviewService from "./review.js";
 
 export {
     userService,
@@ -19,5 +20,6 @@ export {
     cartService,
     paymentService,
     orderService,
-    discountService
+    discountService,
+    reviewService
 }

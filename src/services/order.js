@@ -93,7 +93,7 @@ const createOrder = async ({ email, name, phone, address, city, district, ward, 
       }
       if (discount) {
          orderData.discountAmount = discount;
-         const discountCurrent = await Discount.findOne({code: discountCode});
+         const discountCurrent = await Discount.findOne({ code: discountCode });
          discountCurrent.timesUsed += 1;
          if (discountCurrent.timesUsed >= discountCurrent.maxUses) {
             discountCurrent.isActive = false;
@@ -216,7 +216,7 @@ const groupBy = (array, key) => {
 const getRevenueSummary = async (body) => {
    const startDate = body.startDate
    const endDate = body.endDate
-   const orders = await Order.find({proccesingStatus: 'finish'}, { createdAt: 1, totalPrice: 1 }).exec()
+   const orders = await Order.find({ proccesingStatus: 'finish' }, { createdAt: 1, totalPrice: 1 }).exec()
    const newOrder = orders.map(order => {
       return {
          createdAt: format(new Date(order.createdAt), 'yyyy-MM-dd'),
@@ -237,13 +237,31 @@ const getRevenueSummary = async (body) => {
    }));
 
    return dailyRevenue
-   
+
 }
+
+const getOrderIdsUser = async (id) => {
+
+   const orders = await Order.find({ userId: id, proccesingStatus: 'finish' }, { productsOrder: 1 }).exec()
+   const orderIds = new Set();
+   orders.forEach(order => {
+      order.productsOrder.forEach(product => {
+         if(product.productId) orderIds.add(product.productId);
+      })
+   })
+
+   // Chuyển đổi Set thành mảng
+   const orderIdsArray = [...orderIds];
+   return orderIdsArray
+
+}
+
 export default {
    getAllOrder,
    createOrder,
    getOrdersUserById,
    getOrderDetailsById,
    updateOrder,
-   getRevenueSummary
+   getRevenueSummary,
+   getOrderIdsUser
 }

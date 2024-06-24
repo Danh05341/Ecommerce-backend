@@ -9,6 +9,7 @@ import Payment from './Payment.js'
 import Province from './Province.js'
 import Order from './Order.js'
 import Discount from './Discount.js'
+import Review from './Review.js'
 
 export {
     User,
@@ -21,5 +22,6 @@ export {
     Payment,
     Province,
     Order,
-    Discount
+    Discount,
+    Review
 }

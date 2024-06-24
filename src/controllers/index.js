@@ -10,6 +10,7 @@ import provinceController from './province.js'
 import paymentController from './payment.js'
 import orderController from './order.js'
 import discountController from './discount.js'
+import reviewController from './review.js'
 
 export {
     userController,
@@ -23,5 +24,6 @@ export {
     provinceController,
     paymentController,
     orderController,
-    discountController
+    discountController,
+    reviewController
 }

@@ -28,9 +28,10 @@ const updateDiscount = async (id, updateData) => {
     if (!discount) {
         throw new Error('Discount not found');
     }
-    const newDiscount = { ...discount._doc, ...updateData }
-    console.log('updateData.maxUses: ', updateData.maxUses)
-    console.log('discount.timesUsed: ', discount.timesUsed)
+    let newDiscount = { ...discount._doc, ...updateData }
+    if (updateData.endDate) {
+        newDiscount = {...newDiscount, endDate: new Date(updateData.endDate).setHours(23, 59, 59, 999)}
+    }
     if (updateData.maxUses <= discount.timesUsed) {
         newDiscount.isActive = false;
     } else {
