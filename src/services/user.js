@@ -37,7 +37,7 @@ const register = async ({
 
 
 const createUser = async ({
-    name, email, password, role 
+    name, email, password, role
 }) => {
     const existingUser = await User.findOne({ email }).exec();
     if (existingUser) {
@@ -150,7 +150,23 @@ const deleteUserById = async (id) => {
     const userDeleted = await User.findByIdAndDelete(id).exec();
     await Cart.findByIdAndDelete(userDeleted.cart_id).exec();
     return userDeleted
-}   
+}
+
+const changePassword = async ({ userId, oldPassword, newPassword }) => {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('Không tìm thấy user');
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password)
+    if (!isMatch) throw new Error('Mật khẩu cũ không đúng');
+
+    const hashPassword = await bcrypt.hash(
+        newPassword,
+        parseInt(process.env.SALT_ROUND)
+    );
+    user.password = hashPassword;
+    await user.save();
+    return user
+}
 export default {
     register,
     createUser,
@@ -159,5 +175,6 @@ export default {
     getUserById,
     getAllUsers,
     updateUserById,
-    deleteUserById
+    deleteUserById,
+    changePassword
 }

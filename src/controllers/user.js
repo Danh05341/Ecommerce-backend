@@ -132,6 +132,22 @@ const deleteUserById = async (req, res) => {
         })
     }
 }
+const changePassword = async (req, res) => {
+    try {
+        const { userId, oldPassword, newPassword } = req.body;
+        const result = await userService.changePassword({ userId, oldPassword, newPassword })
+        return res.status(200).json({
+            message: 'ChangePassWord User successfully',
+            data: result
+        })
+    } catch (error) {
+        return res.json({
+            error: error.message.toString(),
+            message: "ChangePassWord User failed"
+        })
+    }
+}
+
 export default {
     register,
     createUser,
@@ -140,5 +156,6 @@ export default {
     getUserById,
     getAllUsers,
     updateUserById,
-    deleteUserById
+    deleteUserById,
+    changePassword
 }
