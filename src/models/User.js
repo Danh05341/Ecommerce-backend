@@ -10,7 +10,17 @@ const User = new Schema(
         image: { type: String },
         cart_id: { type: Schema.Types.ObjectId, ref: "Cart", default: () => null },
         role: { type: String, default: "user" },
-        address: { type: String },
+        addresses: [
+            {
+                fullName: { type: String },
+                phone: { type: String },
+                address: { type: String },
+                isDefault: { type: Boolean, default: false },
+                city: { type: String},
+                district: { type: String},
+                ward: { type: String}
+            }
+        ],
         phone: { type: String }
     },
     {
